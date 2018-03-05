@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-05.
+" Last Change: 2018-03-06.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -12,7 +12,7 @@
 "=======================
 " public 
 "------
-function! hina#PostCreate(name, body, category) abort 
+function! hina#PostsPost(name, body, category) abort 
     let post = {"post" : {"name" : a:name, "body_md" : a:body, "category" : a:category }}
     let header = s:buildHeader()
     let url = s:esa_host . '/posts'
@@ -21,6 +21,52 @@ function! hina#PostCreate(name, body, category) abort
     call s:showMessage('new post created : ' . obj.url)
     return 0
 endfunction 
+
+function! hina#PostsPatch() abort 
+    let org_content = b:hina_posts_current_content
+    let body = join(getline(1,'$'), "\n")
+    let post = { "post" : {
+                \    "body_md"           : body,
+                \    "original_revision" : {
+                \      "body_md" : org_content.body_md,
+                \      "number"  : org_content.revision_number,
+                \      "user"    : org_content.updated_by.screen_name
+                \    }
+                \ }}
+
+    let header = s:buildHeader()
+    let url = s:esa_host . '/posts/' . org_content.number
+    let res = webapi#http#post(url, json_encode(post), header, 'PATCH')
+
+    if res.status !~ "^2.."
+        call s:showError( '' . res.status . ':' . res.message )
+        return 1
+    endif
+
+    return 0
+endfunction 
+
+function! hina#PostsGet(id) abort
+    let header = s:buildHeader()
+    let url = s:esa_host . '/posts/' . a:id
+    let res = webapi#http#get(url, "", header)
+
+    if res.status !~ "^2.."
+        call s:showError( '' . res.status . ':' . res.message )
+        return 1
+    endif
+
+    let content = json_decode(res.content)
+    let body_md_lines = split(content.body_md, "\r\n")
+
+    :enew
+    :set ft=markdown
+
+    let b:hina_posts_current_content = content
+    call setline('.', body_md_lines)
+    return 0
+
+endfunction
 
 " private 
 "-------
