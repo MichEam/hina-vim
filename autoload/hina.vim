@@ -10,12 +10,13 @@
 
 " FUNCTIONS {{{1
 "=======================
+
 " public {{{2
 "------
 function! hina#PostCreate(name, body, category) abort " {{{
     let post = {"post" : {"name" : a:name, "body_md" : a:body, "category" : a:category }}
     let header = s:buildHeader()
-    let url = g:esa_host . '/posts'
+    let url = s:esa_host . '/posts'
     let res = webapi#http#post(url, json_encode(post), header)
     let obj = json_decode(res.content)
     call s:showMessage('new post created : ' . obj.url)
@@ -64,17 +65,17 @@ endif
 
 " Global variables {{{2
 "------------------
-let g:esa_api_version = 'v1'
-let g:esa_host = 'https://api.esa.io/' . g:esa_api_version . '/teams'
-
 let g:hina_working_dir = expand("~/.hina")
-let g:hina_conf_file    = "config.json"
 
 " Appication configs {{{2
 "------------------
 " read config file
-let s:conf_json = join(readfile(g:hina_working_dir . "/" . g:hina_conf_file), '')
+let s:hina_conf_file    = "config.json"
+let s:esa_api_version = 'v1'
+let s:esa_host = 'https://api.esa.io/' . s:esa_api_version . '/teams'
+
+let s:conf_json = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
 let conf = json_decode(s:conf_json)
-let g:esa_host = g:esa_host . "/" . g:conf.team
+let s:esa_host = s:esa_host . "/" . g:conf.team
 let g:esa_token = conf.token
 
