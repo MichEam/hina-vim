@@ -45,7 +45,7 @@ function! hina#Init() abort
     let s:default_team = s:confmap['default_team']
     let s:teamlist = map(s:conflist, {i,v -> v.team})
 
-    let g:hina_initialized = true
+    let g:hina_initialized = 1
 endfunction
 
 function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
