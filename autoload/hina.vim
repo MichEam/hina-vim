@@ -10,11 +10,9 @@
 
 " FUNCTIONS 
 "=======================
-
 " public 
 "------
 function! hina#Init() abort
-    
     " Check dependencies 
     "------------------
     if !executable('curl')
@@ -40,10 +38,7 @@ function! hina#Init() abort
     let s:esa_host = 'https://api.esa.io/' . s:esa_api_version . '/teams'
 
     let s:conf_json = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
-    let s:confmap = json_decode(s:conf_json)
-    let s:conflist = s:confmap['conflist']
-    let s:default_team = s:confmap['default_team']
-    let s:teamlist = map(s:conflist, {i,v -> v.team})
+    let g:confmap = json_decode(s:conf_json)
 
     let g:hina_initialized = 1
 endfunction
@@ -139,6 +134,7 @@ function! s:patchContent(team, number) abort
 endfunction
 
 function! s:getContent(team, number) abort
+
     let header = s:buildHeader(a:team)
     let url = s:esa_host . '/' . a:team . '/posts/' . a:number
     let res = webapi#http#get(url, "", header)
@@ -153,12 +149,14 @@ function! s:getContent(team, number) abort
 endfunction
 
 function! s:getToken(team) abort
-    if !exists('s:conflist')
-        call s:showError("Conf not defines!")
+    let conflist = g:confmap['conflist']
+    let filterd_conflist = filter(copy(conflist), {i,v -> v.team == a:team})
+
+    if !len(filterd_conflist)
+        throw "Illegal State. Cant get Token. team:".a:team
     endif
 
-    let conf = filter(copy(s:conflist), {i,v -> v.team == a:team})
-    return conf[0].token
+    return filterd_conflist[0].token
 endfunction
 
 function! s:buildHeader(team)  abort
@@ -179,4 +177,3 @@ endfunction
 function! s:showError(msg)  abort
     echohl ErrorMsg | echomsg "(T⊖T) < ".a:msg | echohl None
 endfunction 
-
