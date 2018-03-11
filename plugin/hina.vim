@@ -1,20 +1,26 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-05.
+" Last Change: 2018-03-11.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
 " script type: plugin
+"=============================================================================
 
-if &compatible || (exists('g:loaded_hina_vim') && g:loaded_hina_vim)
-  finish
+scriptencoding utf-8
+
+if exists('g:hina_loaded')
+    finish
 endif
-let g:loaded_hina_vim = 1
+let g:hina_loaded = 1
 
-function! s:CompleteArgs(arg_lead,cmdline,cursor_pos)
-    return filter(copy(["-b", "-c", "-p", "-w", "--browser", "--clipboard", "--public", "--wip"
-                \ ]), 'stridx(v:val, a:arg_lead)==0')
-endfunction
+let s:save_cpo = &cpo
+set cpo&vim
 
-command! -nargs=? -range=% -bang -complete=customlist,s:CompleteArgs Hina :call hina#(<count>, "<bang>", <line0>, <line2>, <f-args>)
+" vim script
+command! EsaPush call hina#PostsPush()
+command! EsaPull call hina#PostsPush()
+
+let &cpo = s:save_cpo
+unlet s:save_cpo
