@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-11.
+" Last Change: 2018-03-12.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -14,38 +14,7 @@
 " public 
 "------
 function! hina#Init() abort
-    
-    " Check dependencies 
-    "------------------
-    if !executable('curl')
-        echohl ErrorMsg | echomsg 'Esa: require ''curl'' command' | echohl None
-        finish
-    endif
-
-    if globpath(&rtp, 'autoload/webapi/http.vim') ==# ''
-        echohl ErrorMsg | echomsg 'Esa: require ''webapi'', install https://github.com/mattn/webapi-vim' | echohl None
-        finish
-    endif
-
-    " Global variables 
-    "------------------
-    let g:hina_working_dir = expand("~/.hina")
-
-    " Appication configs 
-    "------------------
-
-    " read config file
-    let s:hina_conf_file    = "config.json"
-    let s:esa_api_version = 'v1'
-    let s:esa_host = 'https://api.esa.io/' . s:esa_api_version . '/teams'
-
-    let s:conf_json = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
-    let s:confmap = json_decode(s:conf_json)
-    let s:conflist = s:confmap['conflist']
-    let s:default_team = s:confmap['default_team']
-    let s:teamlist = map(s:conflist, {i,v -> v.team})
-
-    let g:hina_initialized = 1
+    call s:init()    
 endfunction
 
 function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
@@ -80,7 +49,7 @@ endfunction
 " current bufferをesa.ioと同期する。
 function! hina#PostsPull() abort
     if !exists('g:hina_initialized')
-        call hina#Init()
+        call s:init()
     endif
     
     " detect team and post number.
@@ -88,7 +57,12 @@ function! hina#PostsPull() abort
     let number = s:detectPostNumber()
     
     " get latest content of posts.
-    let b:content = s:getContent(team, number)
+    try 
+        let b:content = s:getContent(team, number)
+    catch
+        s:showError("Sometiong is wrong...")
+        return 1
+    endtry
 
     " reflesh buffer content.
     let body_md_lines = split(b:content.body_md, "\n")
@@ -98,6 +72,53 @@ endfunction
 
 " private 
 "-------
+
+function! s:init() abort
+    
+    " Check dependencies 
+    if !executable('curl')
+        echohl ErrorMsg | echomsg 'Esa: require ''curl'' command' | echohl None
+        finish
+    endif
+
+    if globpath(&rtp, 'autoload/webapi/http.vim') ==# ''
+        echohl ErrorMsg | echomsg 'Esa: require ''webapi'', install https://github.com/mattn/webapi-vim' | echohl None
+        finish
+    endif
+    
+    " Global variables 
+    if !exists('g:hina_working_dir')
+        let g:hina_working_dir = expand("~/.hina")
+    else
+        let g:hina_working_dir = expand(g:hina_working_dir)
+    endif
+
+    " Create working dir
+    " ------------------
+    if exists("*mkdir") && !isdirectory(g:hina_working_dir)
+        call mkdir(g:hina_working_dir, "p")
+        call mkdir(g:hina_working_dir . "/_posts", "p")
+        call mkdir(g:hina_working_dir . "/_drafts", "p")
+    endif
+
+    " read config file
+    let s:hina_conf_file    = "config.json"
+    if !filereadable(g:hina_working_dir."/".s:hina_conf_file)
+        let conf_file_path = g:hina_working_dir."/".s:hina_conf_file
+        call s:showMessage("Please create config file: ".conf_file_path)
+        return
+    endif
+
+    let s:esa_api_version = 'v1'
+    let s:esa_host = 'https://api.esa.io/' . s:esa_api_version . '/teams'
+    let s:conf_json = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
+    let s:confmap = json_decode(s:conf_json)
+    let s:conflist = s:confmap['conflist']
+    let s:default_team = s:confmap['default_team']
+    let s:teamlist = map(s:conflist, {i,v -> v.team})
+
+    let g:hina_initialized = 1
+endfunction
 
 " file pathからteamを特定する
 " foo/bar/tiger/93.md => tiger
@@ -155,6 +176,7 @@ endfunction
 function! s:getToken(team) abort
     if !exists('s:conflist')
         call s:showError("Conf not defines!")
+        throw "ConfNotDefined"
     endif
 
     let conf = filter(copy(s:conflist), {i,v -> v.team == a:team})
