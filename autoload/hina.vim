@@ -13,6 +13,41 @@
 
 " public 
 "------
+function! hina#Init() abort
+    
+    " Check dependencies 
+    "------------------
+    if !executable('curl')
+        echohl ErrorMsg | echomsg 'Esa: require ''curl'' command' | echohl None
+        finish
+    endif
+
+    if globpath(&rtp, 'autoload/webapi/http.vim') ==# ''
+        echohl ErrorMsg | echomsg 'Esa: require ''webapi'', install https://github.com/mattn/webapi-vim' | echohl None
+        finish
+    endif
+
+    " Global variables 
+    "------------------
+    let g:hina_working_dir = expand("~/.hina")
+
+    " Appication configs 
+    "------------------
+
+    " read config file
+    let s:hina_conf_file    = "config.json"
+    let s:esa_api_version = 'v1'
+    let s:esa_host = 'https://api.esa.io/' . s:esa_api_version . '/teams'
+
+    let s:conf_json = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
+    let s:confmap = json_decode(s:conf_json)
+    let s:conflist = s:confmap['conflist']
+    let s:default_team = s:confmap['default_team']
+    let s:teamlist = map(s:conflist, {i,v -> v.team})
+
+    let g:hina_initialized = true
+endfunction
+
 function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
 	" ArgLead		すでに入力されている補完対象の文字列
 	" CmdLine		コマンドライン全体
@@ -25,7 +60,6 @@ function! hina#PostsNew() abort
 endfunction
 
 function! hina#PostsPush() abort 
-
     " check if Post content has pulled.
     if !exists("b:content")
         call s:showError("Please pull post content first ==> :call hina#PostsPull()")
@@ -45,6 +79,10 @@ endfunction
 
 " current bufferをesa.ioと同期する。
 function! hina#PostsPull() abort
+    if !exists('g:hina_initialized')
+        call hina#Init()
+    endif
+    
     " detect team and post number.
     let team = s:detectPostTeam()
     let number = s:detectPostNumber()
@@ -142,35 +180,3 @@ function! s:showError(msg)  abort
     echohl ErrorMsg | echomsg "(T⊖T) < ".a:msg | echohl None
 endfunction 
 
-" MAIN PROC 
-"=======================
-
-" Check dependencies 
-"------------------
-if !executable('curl')
-    echohl ErrorMsg | echomsg 'Esa: require ''curl'' command' | echohl None
-    finish
-endif
-
-if globpath(&rtp, 'autoload/webapi/http.vim') ==# ''
-    echohl ErrorMsg | echomsg 'Esa: require ''webapi'', install https://github.com/mattn/webapi-vim' | echohl None
-    finish
-endif
-
-" Global variables 
-"------------------
-let g:hina_working_dir = expand("~/.hina")
-
-" Appication configs 
-"------------------
-
-" read config file
-let s:hina_conf_file    = "config.json"
-let s:esa_api_version = 'v1'
-let s:esa_host = 'https://api.esa.io/' . s:esa_api_version . '/teams'
-
-let s:conf_json = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
-let s:confmap = json_decode(s:conf_json)
-let s:conflist = s:confmap['conflist']
-let s:default_team = s:confmap['default_team']
-let s:teamlist = map(s:conflist, {i,v -> v.team})

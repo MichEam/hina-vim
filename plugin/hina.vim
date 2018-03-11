@@ -10,17 +10,17 @@
 
 scriptencoding utf-8
 
-if exists('g:hina_loaded')
+if exists('g:loaded_hina')
     finish
 endif
-let g:hina_loaded = 1
+let g:loaded_hina = 1
 
 let s:save_cpo = &cpo
 set cpo&vim
 
 " vim script
 command! EsaPush call hina#PostsPush()
-command! EsaPull call hina#PostsPush()
+command! EsaPull call hina#PostsPull()
 
 let &cpo = s:save_cpo
 unlet s:save_cpo
