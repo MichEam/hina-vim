@@ -8,10 +8,6 @@
 " script type: plugin
 "=============================================================================
 
-" FUNCTIONS 
-"=======================
-" public 
-"------
 function! hina#Init() abort
 
     if !executable('curl')
@@ -107,9 +103,6 @@ function! hina#PostsPull() abort
     :1,$d " delete all line.
     call setline('.', body_md_lines)
 endfunction
-
-" private 
-"-------
 
 " file pathからteamを特定する
 " foo/bar/tiger/93.md => tiger
