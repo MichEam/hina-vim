@@ -13,8 +13,7 @@
 " public 
 "------
 function! hina#Init() abort
-    " Check dependencies 
-    "------------------
+
     if !executable('curl')
         echohl ErrorMsg | echomsg 'Esa: require ''curl'' command' | echohl None
         finish
@@ -25,18 +24,11 @@ function! hina#Init() abort
         finish
     endif
 
-    " Global variables 
-    "------------------
     let g:hina_working_dir = expand("~/.hina")
 
-    " Appication configs 
-    "------------------
-
-    " read config file
     let s:hina_conf_file  = "config.json"
     let s:esa_api_version = 'v1'
     let s:esa_host        = 'https://api.esa.io/' . s:esa_api_version . '/teams'
-
     let s:conf_json       = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
     let s:confmap         = json_decode(s:conf_json)
     let s:default_team    = s:confmap["default-team"]
