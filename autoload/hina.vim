@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-11.
+" Last Change: 2018-03-13.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -33,12 +33,13 @@ function! hina#Init() abort
     "------------------
 
     " read config file
-    let s:hina_conf_file    = "config.json"
+    let s:hina_conf_file  = "config.json"
     let s:esa_api_version = 'v1'
-    let s:esa_host = 'https://api.esa.io/' . s:esa_api_version . '/teams'
+    let s:esa_host        = 'https://api.esa.io/' . s:esa_api_version . '/teams'
 
-    let s:conf_json = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
-    let g:confmap = json_decode(s:conf_json)
+    let s:conf_json       = join(readfile(g:hina_working_dir . "/" . s:hina_conf_file), '')
+    let g:confmap         = json_decode(s:conf_json)
+    let s:default_team    = g:confmap["default-team"]
 
     let g:hina_initialized = 1
 endfunction
