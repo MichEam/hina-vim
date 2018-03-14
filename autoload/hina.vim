@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-13.
+" Last Change: 2018-03-14.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -219,7 +219,6 @@ endfunction
 function!  s:convCategory(categoryFmt) abort
     " TODO: 外部から指定できた方が嬉しい？
     let timeFmt = "%[Yymd]"
-    echo string(a:categoryFmt)
     if match(a:categoryFmt, timeFmt)
         return strftime(a:categoryFmt)
     else
