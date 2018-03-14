@@ -48,7 +48,8 @@ function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
 	" ArgLead		すでに入力されている補完対象の文字列
 	" CmdLine		コマンドライン全体
 	" CursorPos	カーソル位置 (バイト単位のインデックス)
-    return s:teamlist
+    let _ = s:getTeamList()
+    return _
 endfunction
 
 function! hina#PostsNew() abort
@@ -203,6 +204,17 @@ function! s:getToken(team) abort
     endif
 
     return filterd_conflist[0].token
+endfunction
+
+function! s:getTeamList() abort
+    let conflist = s:confmap['conflist']
+    let teamlist = []
+
+    for conf in conflist
+        call add(teamlist, conf['team'])
+    endfor
+
+    return teamlist
 endfunction
 
 function! s:getDefaultCategory(team) abort
