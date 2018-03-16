@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-13.
+" Last Change: 2018-03-14.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -36,7 +36,8 @@ function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
 	" ArgLead		すでに入力されている補完対象の文字列
 	" CmdLine		コマンドライン全体
 	" CursorPos	カーソル位置 (バイト単位のインデックス)
-    return s:teamlist
+    let _ = s:getTeamList()
+    return _
 endfunction
 
 function! hina#PostsNew() abort
@@ -190,6 +191,17 @@ function! s:getToken(team) abort
     return filterd_conflist[0].token
 endfunction
 
+function! s:getTeamList() abort
+    let conflist = s:confmap['conflist']
+    let teamlist = []
+
+    for conf in conflist
+        call add(teamlist, conf['team'])
+    endfor
+
+    return teamlist
+endfunction
+
 function! s:getDefaultCategory(team) abort
     let conflist = s:confmap['conflist']
     let fltdConflist = filter(copy(conflist), {i,e -> e.team == a:team})
@@ -204,7 +216,6 @@ endfunction
 function!  s:convCategory(categoryFmt) abort
     " TODO: 外部から指定できた方が嬉しい？
     let timeFmt = "%[Yymd]"
-    echo string(a:categoryFmt)
     if match(a:categoryFmt, timeFmt)
         return strftime(a:categoryFmt)
     else
