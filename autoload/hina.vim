@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-14.
+" Last Change: 2018-03-20.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -40,6 +40,40 @@ function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
     return _
 endfunction
 
+function! hina#PostsEdit() abort
+    if !exists('g:hina_initialized')
+        call hina#Init()
+    endif
+    
+    let team = input('team ? : ', s:default_team, "customlist,hina#ListTeams")
+    let number = input('number ? :')
+
+    try
+        let content = s:getContent(team, number)
+    catch /.*/
+        return 1
+    endtry
+
+    let body_md_lines = split(content.body_md, "\n")
+
+    try
+        :enew
+    catch /.*/
+        :vs | wincmd L | enew
+    endtry
+
+    let b:org_body_md = content.body_md
+    let b:team = team
+    :set ft=markdown
+    
+    let headerLines = s:createHeaderLines(content)
+    let b:hina_header_start = 1
+    let b:hina_header_end = len(headerLines)
+
+    call setline(1, headerLines)
+    call append(line('$'), body_md_lines)
+endfunction
+
 function! hina#PostsNew() abort
 
     if !exists('g:hina_initialized')
@@ -57,9 +91,21 @@ function! hina#PostsNew() abort
 
     let categoryFmt = s:getDefaultCategory(team)
     let category = s:convCategory(categoryFmt)
-    let b:content = s:postContent(team, name, category)
+    let content = s:postContent(team, name, category)
 
-    call s:showMessage("new Post created ! number:".b:content.number)
+    :1,$d
+    :set ft=markdown
+
+    let b:org_body_md = content.body_md
+    let headerLines = s:createHeaderLines(content)
+    let b:hina_header_start = 1
+    let b:hina_header_end = len(headerLines)
+    let b:team = team
+
+    call setline(1, headerLines)
+    call append(line('$'), split(content.body_md, "\n"))
+
+    call s:showMessage("new Post created ! number:".content.number)
     return 0
 endfunction
 
@@ -69,55 +115,51 @@ function! hina#PostsPush() abort
         call hina#Init()
     endif
 
-    " check if Post content has pulled.
-    if !exists("b:content")
-        call s:showError("Please pull post content first ==> :call hina#PostsPull()")
-        return 1
-    endif
-
-    " detect team and post number.
-    let team = s:detectPostTeam()
-    let number = s:detectPostNumber()
-
     " patch content to server
-    let b:content = s:patchContent(team, number)
+    let meta = s:readHeader()
+    let content = s:patchContent(b:team, meta)
 
-    call s:showMessage("Patched! revision:".b:content.revision_number)
+    call s:showMessage("Patched! revision:".content.revision_number)
+
+    let b:org_body_md = content.body_md
+    let headerLines = s:createHeaderLines(content)
+    let b:hina_header_start = 1
+    let b:hina_header_end = len(headerLines)
+
+    :1,$d
+
+    call setline(1, headerLines)
+    call append(line('$'), split(content.body_md, "\n"))
+
     return 0
 endfunction 
 
-" current bufferをesa.ioと同期する。
-function! hina#PostsPull() abort
-    if !exists('g:hina_initialized')
-        call hina#Init()
-    endif
-    
-    " detect team and post number.
-    let team = s:detectPostTeam()
-    let number = s:detectPostNumber()
-    
-    " get latest content of posts.
-    let b:content = s:getContent(team, number)
-
-    " reflesh buffer content.
-    let body_md_lines = split(b:content.body_md, "\n")
-    :1,$d " delete all line.
-    call setline('.', body_md_lines)
+function! s:readHeader() abort
+    let headerLines = getline(b:hina_header_start+1, b:hina_header_end-1)
+    let _ = hina#yaml#Encode(headerLines)
+    return _
 endfunction
 
-" file pathからteamを特定する
-" foo/bar/tiger/93.md => tiger
-function! s:detectPostTeam() abort
-    let parent_path = expand('%:p:h')
-    let grandparent_path = expand('%:p:h:h')
-    let parent_name = substitute(parent_path, grandparent_path, "", "")
-    return substitute(parent_name, "^\/", "", "")
+function! s:createHeaderLines(content) abort
+    let _ = ["```"]
+    let metaInfo = s:getMetaInfoFrom(a:content)
+    let metaLines = hina#yaml#Decode(metaInfo)
+    call extend(_, metaLines)
+    call add(_, "```")
+    return _
 endfunction
 
-" file nameからpost number を特定する
-" foo/bar/tiger/93.md => 93
-function! s:detectPostNumber() abort
-    return expand('%:t:r')
+function! s:getMetaInfoFrom(content) abort
+    let c = a:content
+    let _ = {}
+
+    let _.category = c.category
+    let _.name     = c.wip ? "[WIP] " : "" | let _.name = _.name . c.name
+    let _.number   = c.number
+    let _.revision = c.revision_number
+    let _.created  = c.created_at." ".c.created_by.name
+    let _.updated  = c.updated_at." ".c.updated_by.name
+    return _
 endfunction
 
 function! s:postContent(team, name, category) abort
@@ -141,24 +183,23 @@ function! s:postContent(team, name, category) abort
     return content
 endfunction
 
-function! s:patchContent(team, number) abort
-    let body = join(getline(1,'$'), "\n")
+function! s:patchContent(team, meta) abort
+    let body = join(getline(b:hina_header_end+1,'$'), "\n")
     let post = { "post" : {
                 \    "body_md"           : body,
                 \    "original_revision" : {
-                \      "body_md" : b:content.body_md,
-                \      "number"  : b:content.revision_number,
-                \      "user"    : b:content.updated_by.screen_name
+                \      "body_md" : b:org_body_md,
+                \      "number"  : a:meta.revision
                 \    }
                 \ }}
 
     let header = s:buildHeader(a:team)
-    let url = s:esa_host . '/' . a:team . '/posts/' . a:number
+    let url = s:esa_host . '/' . a:team . '/posts/' . a:meta.number
     let res = webapi#http#post(url, json_encode(post), header, 'PATCH')
 
     if res.status !~ "^2.."
         call s:showError(''.res.status.':'.res.message.':'.url)
-        return 1
+        throw "Faild to get content."
     endif
 
     let content = json_decode(res.content)
@@ -173,7 +214,7 @@ function! s:getContent(team, number) abort
 
     if res.status !~ "^2.."
         call s:showError(''.res.status.':'.res.message.':'.url)
-        return 1
+        throw "Faild to get content."
     endif
 
     let content = json_decode(res.content)
