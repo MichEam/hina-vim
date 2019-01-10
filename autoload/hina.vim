@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-20.
+" Last Change: 2019-01-10.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -141,11 +141,12 @@ function! s:readHeader() abort
 endfunction
 
 function! s:createHeaderLines(content) abort
-    let _ = ["```"]
+    let _ = ["---"]
     let metaInfo = s:getMetaInfoFrom(a:content)
     let metaLines = hina#yaml#Decode(metaInfo)
     call extend(_, metaLines)
-    call add(_, "```")
+    call add(_, "---")
+    call add(_, "")
     return _
 endfunction
 
