@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-10.
+" Last Change: 2019-01-21.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -54,7 +54,7 @@ function! hina#PostsEdit() abort
         return 1
     endtry
 
-    let body_md_lines = split(content.body_md, "\n")
+    let body_md_lines = split(content.body_md, "\r\n")
 
     try
         :enew
@@ -103,7 +103,7 @@ function! hina#PostsNew() abort
     let b:team = team
 
     call setline(1, headerLines)
-    call append(line('$'), split(content.body_md, "\n"))
+    call append(line('$'), split(content.body_md, "\r\n"))
 
     call s:showMessage("new Post created ! number:".content.number)
     return 0
@@ -129,7 +129,7 @@ function! hina#PostsPush() abort
     :1,$d
 
     call setline(1, headerLines)
-    call append(line('$'), split(content.body_md, "\n"))
+    call append(line('$'), split(content.body_md, "\r\n"))
 
     return 0
 endfunction 
