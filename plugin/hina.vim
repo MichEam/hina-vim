@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2018-03-20.
+" Last Change: 2019-01-22.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -19,9 +19,9 @@ let s:save_cpo = &cpo
 set cpo&vim
 
 " vim script
-command! EsaNew   call hina#PostsNew()
-command! EsaEdit  call hina#PostsEdit()
-command! EsaWrite call hina#PostsPush()
+command! EsaOpen call hina#posts#Edit()
+command! EsaSave call hina#posts#Update()
+command! EsaNew  call hina#posts#New()
 
 " == ROAD MAP ==
 "
