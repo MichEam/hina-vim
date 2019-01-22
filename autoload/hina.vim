@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-21.
+" Last Change: 2019-01-22.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -91,7 +91,7 @@ function! hina#PostsNew() abort
 
     let categoryFmt = s:getDefaultCategory(team)
     let category = s:convCategory(categoryFmt)
-    let content = s:postContent(team, name, category)
+    let content = s:getPost(team, name, category)
 
     :1,$d
     :set ft=markdown
@@ -142,7 +142,7 @@ endfunction
 
 function! s:createHeaderLines(content) abort
     let _ = ["---"]
-    let metaInfo = s:getMetaInfoFrom(a:content)
+    let metaInfo = s:getMetaInfo(a:content)
     let metaLines = hina#yaml#Decode(metaInfo)
     call extend(_, metaLines)
     call add(_, "---")
@@ -150,20 +150,23 @@ function! s:createHeaderLines(content) abort
     return _
 endfunction
 
-function! s:getMetaInfoFrom(content) abort
+function! s:getMetaInfo(content) abort
+    " @see 
+    " https://docs.esa.io/posts/102#記事
     let c = a:content
     let _ = {}
-
-    let _.category = c.category
-    let _.name     = c.wip ? "[WIP] " : "" | let _.name = _.name . c.name
-    let _.number   = c.number
-    let _.revision = c.revision_number
-    let _.created  = c.created_at." ".c.created_by.name
-    let _.updated  = c.updated_at." ".c.updated_by.name
+    let _.name      = c.name
+    let _.category  = c.category
+    let _.tags      = '[' . join(c.tags, ',') . ']'
+    let _.created   = c.created_at." ".c.created_by.name
+    let _.updated   = c.updated_at." ".c.updated_by.name
+    let _.wip       = c.wip
+    let _.number    = c.number
+    let _.revision  = c.revision_number
     return _
 endfunction
 
-function! s:postContent(team, name, category) abort
+function! s:getPost(team, name, category) abort
     let body = join(getline(1,'$'), "\n")
     let post = { "post" : {
                 \    "body_md"           : body,
@@ -211,37 +214,41 @@ function! s:getContent(team, number) abort
 
     let header = s:buildHeader(a:team)
     let url = s:esa_host . '/' . a:team . '/posts/' . a:number
-    let res = webapi#http#get(url, "", header)
+    let response = webapi#http#get(url, "", header)
 
-    if res.status !~ "^2.."
-        call s:showError(''.res.status.':'.res.message.':'.url)
+    if response.status !~ "^2.."
+        call s:showError(''.response.status.':'.response.message.':'.url)
         throw "Faild to get content."
     endif
 
-    let content = json_decode(res.content)
+    let content = json_decode(response.content)
     return content
 endfunction
 
 function! s:getToken(team) abort
-    let conflist = s:confmap['conflist']
-    let filterd_conflist = filter(copy(conflist), {i,v -> v.team == a:team})
+
+    let conflist = copy(s:confmap['conflist'])
+    let filterd_conflist = filter(conflist, {i,v -> v.team == a:team})
 
     if !len(filterd_conflist)
-        throw "Illegal State. Cant get Token. team:".a:team
+        throw "Illegal State. Cant find token for team:".a:team
     endif
 
     return filterd_conflist[0].token
+
 endfunction
 
 function! s:getTeamList() abort
+
     let conflist = s:confmap['conflist']
     let teamlist = []
 
     for conf in conflist
         call add(teamlist, conf['team'])
-    endfor
+    endfunctionor
 
     return teamlist
+
 endfunction
 
 function! s:getDefaultCategory(team) abort
@@ -280,7 +287,7 @@ function! s:showWarn(msg)  abort
     echohl WarningMsg | echomsg "(•᷄ө•᷅) .oO( ".a:msg." )" | echohl None
 endfunction 
 
-function! s:showError(msg)  abort
+function! s:showError(msg) abort
     echohl ErrorMsg | echomsg "(T⊖T) < ".a:msg | echohl None
 endfunction 
 
