@@ -1,7 +1,7 @@
 "=============================================================================
 " File: posts.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-22.
+" Last Change: 2019-01-25.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -20,7 +20,7 @@ function! hina#posts#Edit() abort
         return 1
     endtry
 
-    let body_md_lines = split(content.body_md, "\n")
+    let body_md_lines = split(content.body_md, g:hina_esa_contents_line_sep)
 
     try
         :enew
@@ -33,8 +33,6 @@ function! hina#posts#Edit() abort
     :set ft=markdown
     
     let headerLines = s:createHeaderLines(content)
-    let b:hina_header_start = 1
-    let b:hina_header_end = len(headerLines)
 
     call setline(1, headerLines)
     call append(line('$'), body_md_lines)
@@ -62,12 +60,10 @@ function! hina#posts#New() abort
 
     let b:org_body_md = content.body_md
     let headerLines = s:createHeaderLines(content)
-    let b:hina_header_start = 1
-    let b:hina_header_end = len(headerLines)
     let b:team = team
 
     call setline(1, headerLines)
-    call append(line('$'), split(content.body_md, "\r\n"))
+    call append(line('$'), split(content.body_md, g:hina_esa_contents_line_sep))
 
     call s:showMessage("new Post created ! number:".content.number)
     return 0
@@ -79,25 +75,41 @@ function! hina#posts#Update() abort
 
     " patch content to server
     let meta = s:readHeader()
+
+    if !exists('b:team') 
+        let b:team = input('which team ? : ', g:hina_default_team, "customlist,hina#ListTeams")
+    endif
+        
     let content = s:patchContent(b:team, meta)
 
     call s:showMessage("Patched! revision:".content.revision_number)
 
     let b:org_body_md = content.body_md
     let headerLines = s:createHeaderLines(content)
-    let b:hina_header_start = 1
-    let b:hina_header_end = len(headerLines)
 
     :1,$d
-
     call setline(1, headerLines)
-    call append(line('$'), split(content.body_md, "\r\n"))
+    call append(line('$'), split(content.body_md, g:hina_esa_contents_line_sep))
 
     return 0
 endfunction 
 
+function! s:headerEnd() abort
+    let current_line = line('.')
+    let current_col = col('.')
+
+    call cursor(2,1)
+    let e = search("^\" ---") - 1
+
+    call cursor(current_line, current_col)
+    return e
+endfunction
+
 function! s:readHeader() abort
-    let headerLines = getline(b:hina_header_start+1, b:hina_header_end-1)
+    let start = 1
+    let end = s:headerEnd()
+
+    let headerLines = getline(start, end)
     let _ = hina#yaml#Encode(headerLines)
     return _
 endfunction
@@ -150,7 +162,7 @@ function! s:getPost(team, name, category) abort
 endfunction
 
 function! s:patchContent(team, meta) abort
-    let body = join(getline(b:hina_header_end+1,'$'), "\n")
+    let body = join(getline(s:headerEnd() ,'$'), "\n")
     let post = { "post" : {
                 \    "body_md"           : body,
                 \    "original_revision" : {

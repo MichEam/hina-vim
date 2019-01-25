@@ -1,0 +1,46 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/0f27679/
+EsaNew	plugin/hina.vim	/^command! EsaNew  call hina#posts#New()$/;"	c
+EsaOpen	plugin/hina.vim	/^command! EsaOpen call hina#posts#Edit()$/;"	c
+EsaSave	plugin/hina.vim	/^command! EsaSave call hina#posts#Update()$/;"	c
+g:hina_conf_file	autoload/hina.vim	/^    let g:hina_conf_file       = "config.json"$/;"	v
+g:hina_conf_json	autoload/hina.vim	/^    let g:hina_conf_json       = join(readfile(g:hina_working_dir . "\/" . g:hina_conf_file), ''/;"	v
+g:hina_confmap	autoload/hina.vim	/^    let g:hina_confmap         = json_decode(g:hina_conf_json)$/;"	v
+g:hina_default_team	autoload/hina.vim	/^    let g:hina_default_team    = g:hina_confmap["default-team"]$/;"	v
+g:hina_esa_api_version	autoload/hina.vim	/^    let g:hina_esa_api_version = 'v1'$/;"	v
+g:hina_esa_contents_line_sep	autoload/hina.vim	/^        let g:hina_esa_contents_line_sep = '\\n'$/;"	v
+g:hina_esa_contents_line_sep	autoload/hina.vim	/^        let g:hina_esa_contents_line_sep = '\\r\\n'$/;"	v
+g:hina_esa_host	autoload/hina.vim	/^    let g:hina_esa_host        = 'https:\/\/api.esa.io\/' . g:hina_esa_api_version . '\/teams'$/;"	v
+g:hina_initialized	autoload/hina.vim	/^    let g:hina_initialized = 1$/;"	v
+g:hina_working_dir	autoload/hina.vim	/^    let g:hina_working_dir = expand("~\/.hina")$/;"	v
+g:loaded_hina	plugin/hina.vim	/^let g:loaded_hina = 1$/;"	v
+hina#Init	autoload/hina.vim	/^function! hina#Init() abort$/;"	f
+hina#ListTeams	autoload/hina.vim	/^function! hina#ListTeams(ArgLead, CmdLine, CursorPos)$/;"	f
+hina#posts#Edit	autoload/hina/posts.vim	/^function! hina#posts#Edit() abort$/;"	f
+hina#posts#New	autoload/hina/posts.vim	/^function! hina#posts#New() abort$/;"	f
+hina#posts#Sync	autoload/hina/posts.vim	/^function! hina#posts#Sync() abort $/;"	f
+hina#posts#Update	autoload/hina/posts.vim	/^function! hina#posts#Update() abort $/;"	f
+hina#yaml#Decode	autoload/hina/yaml.vim	/^function! hina#yaml#Decode(obj) abort$/;"	f
+hina#yaml#Encode	autoload/hina/yaml.vim	/^function! hina#yaml#Encode(lines) abort$/;"	f
+hina-vim ( ⁰⊖⁰)	README.md	/^# hina-vim ( ⁰⊖⁰)$/;"	c
+s:buildHTTPHeader	autoload/hina/posts.vim	/^function! s:buildHTTPHeader(team)  abort$/;"	f
+s:convCategory	autoload/hina/posts.vim	/^function!  s:convCategory(categoryFmt) abort$/;"	f
+s:createHeaderLines	autoload/hina/posts.vim	/^function! s:createHeaderLines(content) abort$/;"	f
+s:getContent	autoload/hina/posts.vim	/^function! s:getContent(team, number) abort$/;"	f
+s:getDefaultCategory	autoload/hina/posts.vim	/^function! s:getDefaultCategory(team) abort$/;"	f
+s:getMetaInfo	autoload/hina/posts.vim	/^function! s:getMetaInfo(content) abort$/;"	f
+s:getPost	autoload/hina/posts.vim	/^function! s:getPost(team, name, category) abort$/;"	f
+s:getTeamList	autoload/hina/posts.vim	/^function! s:getTeamList() abort$/;"	f
+s:getToken	autoload/hina/posts.vim	/^function! s:getToken(team) abort$/;"	f
+s:patchContent	autoload/hina/posts.vim	/^function! s:patchContent(team, meta) abort$/;"	f
+s:readHeader	autoload/hina/posts.vim	/^function! s:readHeader() abort$/;"	f
+s:save_cpo	plugin/hina.vim	/^let s:save_cpo = &cpo$/;"	v
+s:showError	autoload/hina/posts.vim	/^function! s:showError(msg) abort$/;"	f
+s:showMessage	autoload/hina/posts.vim	/^function! s:showMessage(msg)  abort$/;"	f
+s:showWarn	autoload/hina/posts.vim	/^function! s:showWarn(msg)  abort$/;"	f
+s:strftime	autoload/hina/posts.vim	/^function! s:strftime(fmt) abort$/;"	f

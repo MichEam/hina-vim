@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-22.
+" Last Change: 2019-01-25.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -13,6 +13,12 @@ function! hina#Init() abort
     if !executable('curl')
         echohl ErrorMsg | echomsg 'Esa: require ''curl'' command' | echohl None
         finish
+    endif
+
+    if has('gui_macvim')
+        let g:hina_esa_contents_line_sep = '\r\n'
+    else
+        let g:hina_esa_contents_line_sep = '\n'
     endif
 
     if globpath(&rtp, 'autoload/webapi/http.vim') ==# ''
