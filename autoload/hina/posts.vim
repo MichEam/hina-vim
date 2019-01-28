@@ -1,7 +1,7 @@
 "=============================================================================
 " File: posts.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-25.
+" Last Change: 2019-01-28.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -89,7 +89,8 @@ function! hina#posts#Update() abort
 
     :1,$d
     call setline(1, headerLines)
-    call append(line('$'), split(content.body_md, g:hina_esa_contents_line_sep))
+    " HACK: PATCHの時には '\r\n' で帰って来ない？？  
+    call append(line('$'), split(content.body_md, "\n"))
 
     return 0
 endfunction 
@@ -99,7 +100,7 @@ function! s:headerEnd() abort
     let current_col = col('.')
 
     call cursor(2,1)
-    let e = search("^\" ---") - 1
+    let e = search("^---")
 
     call cursor(current_line, current_col)
     return e
@@ -109,7 +110,7 @@ function! s:readHeader() abort
     let start = 1
     let end = s:headerEnd()
 
-    let headerLines = getline(start, end)
+    let headerLines = getline(start+1, end-1)
     let _ = hina#yaml#Encode(headerLines)
     return _
 endfunction
@@ -121,6 +122,7 @@ function! s:createHeaderLines(content) abort
     call extend(_, metaLines)
     call add(_, "---")
     call add(_, "")
+    echo _
     return _
 endfunction
 
@@ -162,7 +164,7 @@ function! s:getPost(team, name, category) abort
 endfunction
 
 function! s:patchContent(team, meta) abort
-    let body = join(getline(s:headerEnd() ,'$'), "\n")
+    let body = join(getline(s:headerEnd()+1 ,'$'), "\n")
     let post = { "post" : {
                 \    "body_md"           : body,
                 \    "original_revision" : {
