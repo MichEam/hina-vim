@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-22.
+" Last Change: 2019-01-28.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -21,16 +21,8 @@ set cpo&vim
 " vim script
 command! EsaOpen call hina#posts#Edit()
 command! EsaSave call hina#posts#Update()
+command! EsaSync call hina#posts#Sync()
 command! EsaNew  call hina#posts#New()
-
-" == ROAD MAP ==
-"
-" | コマンド    | エイリアス | 引数      | 説明                                     |
-" +-------------+------------+-----------+------------------------------------------+
-" | HinaEdit    | hina       | ${number} | 既存の記事の編集を開始する               |
-" | HinaEditNew | hinanew    |           | 新規記事の編集を開始する                 |
-" | HinaWrite   | hinaw      |           | 編集中の記事を保存する(esa.ioへのポスト) |
-" | HinaOpen    | hinao      |           | 編集中の記事をブラウザで開く             |
 
 let &cpo = s:save_cpo
 unlet s:save_cpo

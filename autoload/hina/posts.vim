@@ -22,11 +22,15 @@ function! hina#posts#Edit() abort
 
     let body_md_lines = split(content.body_md, g:hina_esa_contents_line_sep)
 
-    try
-        :enew
-    catch /.*/
-        :vs | wincmd L | enew
-    endtry
+    if input('新規バッファに読み込みますか? [y/n]: ', 'y') == 'y'
+        try
+            :enew
+        catch /.*/
+            :vs | wincmd L | enew
+        endtry
+    endif
+
+    :1,$d
 
     let b:org_body_md = content.body_md
     let b:team = team
@@ -53,7 +57,7 @@ function! hina#posts#New() abort
 
     let categoryFmt = s:getDefaultCategory(team)
     let category = s:convCategory(categoryFmt)
-    let content = s:getPost(team, name, category)
+    let content = s:post(team, name, category)
 
     :1,$d
     :set ft=markdown
@@ -76,8 +80,9 @@ function! hina#posts#Update() abort
     " patch content to server
     let meta = s:readHeader()
 
-    if !exists('b:team') 
-        let b:team = input('which team ? : ', g:hina_default_team, "customlist,hina#ListTeams")
+    if !exists('b:team') || !exists('b:org_body_md')
+        call s:showWarn('このバッファはesa.ioと同期されていません。`:EsaSync` を実行してからやり直してください')
+        return 1
     endif
         
     let content = s:patchContent(b:team, meta)
@@ -94,6 +99,31 @@ function! hina#posts#Update() abort
 
     return 0
 endfunction 
+
+function! hina#posts#Sync() abort
+    if !exists('g:hina_initialized') | call hina#Init() | endif
+
+    let team = input('which team ? : ', g:hina_default_team, "customlist,hina#ListTeams")
+    if team == ''
+        return 0
+    endif
+
+    let metaInfo = s:readHeader()
+    let number = metaInfo['number']
+    let revision = metaInfo['revision']
+    let content = s:getContent(team, number)
+
+    if revision != content['revision_number']
+        call s:showError('残念ながら、その記事はesa.ioで更新されています。:EsaOpenしてやり直してくださいぃ')
+        return 1
+    endif
+
+    let b:team = term
+    let b:org_body_md = content['body_md']
+
+    call s:showMessage(printf("バッファを記事:%s, リビジョン:%d と同期しました。", number, revision))
+    return 0
+endfunction
 
 function! s:headerEnd() abort
     let current_line = line('.')
@@ -142,7 +172,7 @@ function! s:getMetaInfo(content) abort
     return _
 endfunction
 
-function! s:getPost(team, name, category) abort
+function! s:post(team, name, category) abort
     let body = join(getline(1,'$'), "\n")
     let post = { "post" : {
                 \    "body_md"           : body,
