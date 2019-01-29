@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-25.
+" Last Change: 2019-01-29.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -48,4 +48,16 @@ function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
     let _ = s:getTeamList()
     return _
 endfunction
+
+function! hina#Msg(msg)  abort
+    echohl Normal | echomsg "(⁰⊖⁰) .oO( ".a:msg." )" | echohl None
+endfunction 
+
+function! hina#Warn(msg)  abort
+    echohl WarningMsg | echomsg "(•᷄ө•᷅) .oO( ".a:msg." )" | echohl None
+endfunction 
+
+function! hina#Error(msg) abort
+    echohl ErrorMsg | echomsg "(T⊖T) < ".a:msg | echohl None
+endfunction 
 

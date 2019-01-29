@@ -1,7 +1,7 @@
 "=============================================================================
 " File: posts.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-28.
+" Last Change: 2019-01-29.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -69,7 +69,7 @@ function! hina#posts#New() abort
     call setline(1, headerLines)
     call append(line('$'), split(content.body_md, g:hina_esa_contents_line_sep))
 
-    call s:showMessage("new Post created ! number:".content.number)
+    call hina#Msg("new Post created ! number:".content.number)
     return 0
 endfunction
 
@@ -81,13 +81,13 @@ function! hina#posts#Update() abort
     let meta = s:readHeader()
 
     if !exists('b:team') || !exists('b:org_body_md')
-        call s:showWarn('このバッファはesa.ioと同期されていません。`:EsaSync` を実行してからやり直してください')
+        call hina#Warn('このバッファはesa.ioと同期されていません。`:EsaSync` を実行してからやり直してください')
         return 1
     endif
         
     let content = s:patchContent(b:team, meta)
 
-    call s:showMessage("Patched! revision:".content.revision_number)
+    call hina#Msg("Patched! revision:".content.revision_number)
 
     let b:org_body_md = content.body_md
     let headerLines = s:createHeaderLines(content)
@@ -114,14 +114,14 @@ function! hina#posts#Sync() abort
     let content = s:getContent(team, number)
 
     if revision != content['revision_number']
-        call s:showError('残念ながら、その記事はesa.ioで更新されています。:EsaOpenしてやり直してくださいぃ')
+        call hina#Error('残念ながら、その記事はesa.ioで更新されています。:EsaOpenしてやり直してくださいぃ')
         return 1
     endif
 
     let b:team = term
     let b:org_body_md = content['body_md']
 
-    call s:showMessage(printf("バッファを記事:%s, リビジョン:%d と同期しました。", number, revision))
+    call hina#Msg(printf("バッファを記事:%s, リビジョン:%d と同期しました。", number, revision))
     return 0
 endfunction
 
@@ -185,7 +185,7 @@ function! s:post(team, name, category) abort
     let res = webapi#http#post(url, json_encode(post), header)
 
     if res.status !~ "^2.."
-        call s:showError(''.res.status.':'.res.message.':'.url)
+        call hina#Error(''.res.status.':'.res.message.':'.url)
         return 1
     endif
 
@@ -208,7 +208,7 @@ function! s:patchContent(team, meta) abort
     let res = webapi#http#post(url, json_encode(post), header, 'PATCH')
 
     if res.status !~ "^2.."
-        call s:showError(''.res.status.':'.res.message.':'.url)
+        call hina#Error(''.res.status.':'.res.message.':'.url)
         throw "Faild to get content."
     endif
 
@@ -223,7 +223,7 @@ function! s:getContent(team, number) abort
     let response = webapi#http#get(url, "", header)
 
     if response.status !~ "^2.."
-        call s:showError(''.response.status.':'.response.message.':'.url)
+        call hina#Error(''.response.status.':'.response.message.':'.url)
         throw "Faild to get content."
     endif
 
@@ -287,21 +287,6 @@ function! s:buildHTTPHeader(team)  abort
     let _['Content-Type']  = "application/json"
     let _['Authorization'] = 'Bearer ' . s:getToken(a:team)
     return _
-endfunction 
-
-" TODO: move to autoload/hina/util.vim
-function! s:showMessage(msg)  abort
-    echohl Normal | echomsg "(⁰⊖⁰) .oO( ".a:msg." )" | echohl None
-endfunction 
-
-" TODO: move to autoload/hina/util.vim
-function! s:showWarn(msg)  abort
-    echohl WarningMsg | echomsg "(•᷄ө•᷅) .oO( ".a:msg." )" | echohl None
-endfunction 
-
-" TODO: move to autoload/hina/util.vim
-function! s:showError(msg) abort
-    echohl ErrorMsg | echomsg "(T⊖T) < ".a:msg | echohl None
 endfunction 
 
 " TODO: move to autoload/hina/util.vim
