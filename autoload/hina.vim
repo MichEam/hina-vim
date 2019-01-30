@@ -28,10 +28,8 @@ function! hina#Init() abort
 
     let g:hina_working_dir = expand("~/.hina")
 
-    " TODO: change scope to global.
     let g:hina_esa_api_version = 'v1'
     let g:hina_esa_host        = 'https://api.esa.io/' . g:hina_esa_api_version . '/teams'
-
     let g:hina_conf_file       = "config.json"
     " TODO: need to reload conf per proc.
     let g:hina_conf_json       = join(readfile(g:hina_working_dir . "/" . g:hina_conf_file), '')

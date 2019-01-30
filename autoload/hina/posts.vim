@@ -8,6 +8,32 @@
 " script type: plugin
 "=============================================================================
 
+" カーソル位置に投稿リンクを埋め込む
+function! hina#posts#InsertLink(insertMode) abort
+    let _ = hina#posts#GetPostLink()
+    execute ":normal a" . _
+    if a:insertMode
+        execute ":startinsert"
+        call cursor(line("."), col(".")+1)
+    endif
+endfunction
+
+function! hina#posts#GetPostLink() abort
+    if !exists('g:hina_initialized') | call hina#Init() | endif
+
+    try
+        let team = s:readHeader()['team']
+    catch /HeaderNotExists/ 
+        let team = input('team: ', g:hina_default_team, "customlist,hina#ListTeams")
+    endtry
+    let number = input('reference post number:')
+
+    let content = s:getContent(team, number)
+    let fullName = content['full_name']
+
+    return printf('[#%d:%s](/posts/%d)', number, fullName, number)
+endfunction
+
 function! hina#posts#Edit() abort
     if !exists('g:hina_initialized') | call hina#Init() | endif
     
@@ -36,7 +62,7 @@ function! hina#posts#Edit() abort
     let b:team = team
     :set ft=markdown
     
-    let headerLines = s:createHeaderLines(content)
+    let headerLines = s:createHeaderLines(content, team)
 
     call setline(1, headerLines)
     call append(line('$'), body_md_lines)
@@ -63,7 +89,7 @@ function! hina#posts#New() abort
     :set ft=markdown
 
     let b:org_body_md = content.body_md
-    let headerLines = s:createHeaderLines(content)
+    let headerLines = s:createHeaderLines(content, team)
     let b:team = team
 
     call setline(1, headerLines)
@@ -90,7 +116,7 @@ function! hina#posts#Update() abort
     call hina#Msg("Patched! revision:".content.revision_number)
 
     let b:org_body_md = content.body_md
-    let headerLines = s:createHeaderLines(content)
+    let headerLines = s:createHeaderLines(content, team)
 
     :1,$d
     call setline(1, headerLines)
@@ -139,15 +165,17 @@ endfunction
 function! s:readHeader() abort
     let start = 1
     let end = s:headerEnd()
+    if getline(1) != '---' || end == 0 | throw "HeaderNotExists" | endif
 
     let headerLines = getline(start+1, end-1)
     let _ = hina#yaml#Encode(headerLines)
+    if !_['number'] | throw "HeaderNotExists" | endif
     return _
 endfunction
 
-function! s:createHeaderLines(content) abort
+function! s:createHeaderLines(content, team) abort
     let _ = ["---"]
-    let metaInfo = s:getMetaInfo(a:content)
+    let metaInfo = s:toMetaInfo(a:content, a:team)
     let metaLines = hina#yaml#Decode(metaInfo)
     call extend(_, metaLines)
     call add(_, "---")
@@ -156,11 +184,12 @@ function! s:createHeaderLines(content) abort
     return _
 endfunction
 
-function! s:getMetaInfo(content) abort
+function! s:toMetaInfo(content, team) abort
     " @see 
     " https://docs.esa.io/posts/102#記事
     let c = a:content
     let _ = {}
+    let _.team      = c.team
     let _.name      = c.name
     let _.category  = c.category
     let _.tags      = '[' . join(c.tags, ',') . ']'

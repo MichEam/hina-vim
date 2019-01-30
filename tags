@@ -4,17 +4,17 @@
 !_TAG_PROGRAM_NAME	Exuberant Ctags	//
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+EsaInsertLink	plugin/hina.vim	/^command! EsaInsertLink call hina#posts#InsertLink(0)$/;"	c
 EsaNew	plugin/hina.vim	/^command! EsaNew  call hina#posts#New()$/;"	c
 EsaOpen	plugin/hina.vim	/^command! EsaOpen call hina#posts#Edit()$/;"	c
 EsaSave	plugin/hina.vim	/^command! EsaSave call hina#posts#Update()$/;"	c
 EsaSync	plugin/hina.vim	/^command! EsaSync call hina#posts#Sync()$/;"	c
 buildHTTPHeader	autoload/hina/posts.vim	/^function! s:buildHTTPHeader(team)  abort$/;"	f
 convCategory	autoload/hina/posts.vim	/^function!  s:convCategory(categoryFmt) abort$/;"	f
-createHeaderLines	autoload/hina/posts.vim	/^function! s:createHeaderLines(content) abort$/;"	f
+createHeaderLines	autoload/hina/posts.vim	/^function! s:createHeaderLines(content, team) abort$/;"	f
 g:loaded_hina	plugin/hina.vim	/^let g:loaded_hina = 1$/;"	v
 getContent	autoload/hina/posts.vim	/^function! s:getContent(team, number) abort$/;"	f
 getDefaultCategory	autoload/hina/posts.vim	/^function! s:getDefaultCategory(team) abort$/;"	f
-getMetaInfo	autoload/hina/posts.vim	/^function! s:getMetaInfo(content) abort$/;"	f
 getTeamList	autoload/hina/posts.vim	/^function! s:getTeamList() abort$/;"	f
 getToken	autoload/hina/posts.vim	/^function! s:getToken(team) abort$/;"	f
 headerEnd	autoload/hina/posts.vim	/^function! s:headerEnd() abort$/;"	f
@@ -24,6 +24,8 @@ hina#ListTeams	autoload/hina.vim	/^function! hina#ListTeams(ArgLead, CmdLine, Cu
 hina#Msg	autoload/hina.vim	/^function! hina#Msg(msg)  abort$/;"	f
 hina#Warn	autoload/hina.vim	/^function! hina#Warn(msg)  abort$/;"	f
 hina#posts#Edit	autoload/hina/posts.vim	/^function! hina#posts#Edit() abort$/;"	f
+hina#posts#GetPostLink	autoload/hina/posts.vim	/^function! hina#posts#GetPostLink() abort$/;"	f
+hina#posts#InsertLink	autoload/hina/posts.vim	/^function! hina#posts#InsertLink(insertMode) abort$/;"	f
 hina#posts#New	autoload/hina/posts.vim	/^function! hina#posts#New() abort$/;"	f
 hina#posts#Sync	autoload/hina/posts.vim	/^function! hina#posts#Sync() abort$/;"	f
 hina#posts#Update	autoload/hina/posts.vim	/^function! hina#posts#Update() abort $/;"	f
@@ -34,3 +36,4 @@ post	autoload/hina/posts.vim	/^function! s:post(team, name, category) abort$/;"	
 readHeader	autoload/hina/posts.vim	/^function! s:readHeader() abort$/;"	f
 s:save_cpo	plugin/hina.vim	/^let s:save_cpo = &cpo$/;"	v
 strftime	autoload/hina/posts.vim	/^function! s:strftime(fmt) abort$/;"	f
+toMetaInfo	autoload/hina/posts.vim	/^function! s:toMetaInfo(content, team) abort$/;"	f
