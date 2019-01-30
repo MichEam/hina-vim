@@ -1,7 +1,7 @@
 "=============================================================================
 " File: posts.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-29.
+" Last Change: 2019-01-30.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -144,7 +144,7 @@ function! hina#posts#Sync() abort
         return 1
     endif
 
-    let b:team = term
+    let b:team = team
     let b:org_body_md = content['body_md']
 
     call hina#Msg(printf("バッファを記事:%s, リビジョン:%d と同期しました。", number, revision))
