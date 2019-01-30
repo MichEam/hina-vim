@@ -189,7 +189,7 @@ function! s:toMetaInfo(content, team) abort
     " https://docs.esa.io/posts/102#記事
     let c = a:content
     let _ = {}
-    let _.team      = c.team
+    let _.team      = a:team
     let _.name      = c.name
     let _.category  = c.category
     let _.tags      = '[' . join(c.tags, ',') . ']'
