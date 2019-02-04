@@ -1,7 +1,7 @@
 "=============================================================================
 " File: posts.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-30.
+" Last Change: 2019-01-31.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
