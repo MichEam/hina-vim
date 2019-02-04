@@ -116,7 +116,7 @@ function! hina#posts#Update() abort
     call hina#Msg("Patched! revision:".content.revision_number)
 
     let b:org_body_md = content.body_md
-    let headerLines = s:createHeaderLines(content, team)
+    let headerLines = s:createHeaderLines(content, b:team)
 
     :1,$d
     call setline(1, headerLines)
