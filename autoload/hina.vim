@@ -1,7 +1,7 @@
 "=============================================================================
 " File: hina.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-29.
+" Last Change: 2019-02-13.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -13,12 +13,6 @@ function! hina#Init() abort
     if !executable('curl')
         echohl ErrorMsg | echomsg 'Esa: require ''curl'' command' | echohl None
         finish
-    endif
-
-    if has('gui_macvim')
-        let g:hina_esa_contents_line_sep = '\r\n'
-    else
-        let g:hina_esa_contents_line_sep = '\n'
     endif
 
     if globpath(&rtp, 'autoload/webapi/http.vim') ==# ''
@@ -45,6 +39,12 @@ function! hina#ListTeams(ArgLead, CmdLine, CursorPos)
 	" CursorPos	カーソル位置 (バイト単位のインデックス)
     let _ = s:getTeamList()
     return _
+endfunction
+
+function! hina#SplitBody(org_str)
+    let splitted = split(a:org_str, '\n', 1)
+    call map(splitted, {idx,val -> substitute(val, "\\r", "", "g")})
+    return splitted
 endfunction
 
 function! hina#Msg(msg)  abort

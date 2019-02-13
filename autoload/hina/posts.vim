@@ -1,7 +1,7 @@
 "=============================================================================
 " File: posts.vim
 " Author: Michito Maeda <michito.maeda@gmail.com>
-" Last Change: 2019-01-31.
+" Last Change: 2019-02-13.
 " Version: 0.1
 " WebPage: http://github.com/MichEam/hina-vim
 " License: MIT
@@ -46,7 +46,7 @@ function! hina#posts#Edit() abort
         return 1
     endtry
 
-    let body_md_lines = split(content.body_md, g:hina_esa_contents_line_sep)
+    let splitted_body = hina#SplitBody(content.body_md)
 
     if input('新規バッファに読み込みますか? [y/n]: ', 'y') == 'y'
         try
@@ -65,7 +65,7 @@ function! hina#posts#Edit() abort
     let headerLines = s:createHeaderLines(content, team)
 
     call setline(1, headerLines)
-    call append(line('$'), body_md_lines)
+    call append(line('$'), splitted_body)
 endfunction
 
 function! hina#posts#New() abort
@@ -93,7 +93,8 @@ function! hina#posts#New() abort
     let b:team = team
 
     call setline(1, headerLines)
-    call append(line('$'), split(content.body_md, g:hina_esa_contents_line_sep))
+    let splitted_body = hina#SplitBody(content.body_md)
+    call append(line('$'), splitted_body)
 
     call hina#Msg("new Post created ! number:".content.number)
     return 0
@@ -111,7 +112,8 @@ function! hina#posts#Update() abort
         return 1
     endif
         
-    let content = s:patchContent(b:team, meta)
+    let team = b:team
+    let content = s:patchContent(team, meta)
 
     call hina#Msg("Patched! revision:".content.revision_number)
 
@@ -120,8 +122,8 @@ function! hina#posts#Update() abort
 
     :1,$d
     call setline(1, headerLines)
-    " HACK: PATCHの時には '\r\n' で帰って来ない？？  
-    call append(line('$'), split(content.body_md, "\n"))
+    let splitted_body = hina#SplitBody(content.body_md)
+    call append(line('$'), splitted_body)
 
     return 0
 endfunction 
@@ -179,8 +181,6 @@ function! s:createHeaderLines(content, team) abort
     let metaLines = hina#yaml#Decode(metaInfo)
     call extend(_, metaLines)
     call add(_, "---")
-    call add(_, "")
-    echo _
     return _
 endfunction
 
@@ -202,7 +202,7 @@ function! s:toMetaInfo(content, team) abort
 endfunction
 
 function! s:post(team, name, category) abort
-    let body = join(getline(1,'$'), "\n")
+    let body = join(getline(1,'$'), "\r\n")
     let post = { "post" : {
                 \    "body_md"           : body,
                 \    "name"              : a:name,
@@ -223,7 +223,7 @@ function! s:post(team, name, category) abort
 endfunction
 
 function! s:patchContent(team, meta) abort
-    let body = join(getline(s:headerEnd()+1 ,'$'), "\n")
+    let body = join(getline(s:headerEnd()+1 ,'$'), "\r\n")
     let post = { "post" : {
                 \    "body_md"           : body,
                 \    "original_revision" : {
